@@ -5,7 +5,7 @@ status: approved
 
 # Build Checklist
 
-Build mode: pending learner choice
+Build mode: fast
 
 ## Slices
 
@@ -31,7 +31,7 @@ Build mode: pending learner choice
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after Slice 1, before final visual refinement.
+- [x] Early usable behavior explored — after Slice 1, before final visual refinement.
 - [ ] Final kick-the-tires exploration and feedback completed — after Slice 2.
 
 ## Final Review
@@ -51,3 +51,6 @@ Reflection: [offered/answered/declined/already covered — personal answer belon
 Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
 
 ## Revisions
+
+- Use Worker compatibility date `2026-10-01` instead of the environment date — the installed local `workerd` build rejected `2026-10-04` as a future unsupported date; the earlier supported date keeps the planned Worker architecture unchanged.
+- Slice 1 checkpoint feedback: organizer analysis works; for Slice 2, increase supporting text, labels, helper text, privacy notice, textarea, and button sizes, and consider a slightly wider main content/card. Keep the headline and behavior unchanged.
