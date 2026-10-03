@@ -9,7 +9,7 @@ Build mode: fast
 
 ## Slices
 
-- [ ] **1. Paste rules and review grounded organizer requirements**
+- [x] **1. Paste rules and review grounded organizer requirements**
   Becomes usable: A runnable Submission Lens page accepts up to 50,000 characters of rules, analyzes them through the server-only Gemini route, and shows validated organizer requirements with category, completion control, source excerpt, and review status.
   Why now: This proves the riskiest and most distinctive path first: turning pasted text into a grounded, uncertainty-aware checklist. Project setup is included here so the first step delivers behavior rather than scaffolding alone.
   PRD ref: `prd.md > The Core Journey`, `prd.md > Analyze pasted rules`, `prd.md > States and Boundaries`
