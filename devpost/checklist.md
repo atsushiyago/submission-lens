@@ -19,7 +19,7 @@ Build mode: fast
   Learner check: Open the app, paste a short rules excerpt with one clear requirement, analyze it, and check whether the category, source quote, uncertainty treatment, and privacy note match what you expected. Also try text over the limit and confirm it stays in the box with an inline message and no analysis request.
   Commit: `Build grounded organizer analysis flow`
 
-- [ ] **2. Complete the two-source checklist and progress experience**
+- [x] **2. Complete the two-source checklist and progress experience**
   Becomes usable: Organizer requirements appear alongside the fixed, clearly labeled safety recommendations, with per-section completion counts and a live remaining-work summary. Empty extraction still leaves useful safety checks visible.
   Why now: Once the evidence-backed organizer list works, this completes the unique kernel by bringing the two sources together and makes the main demo journey usable without adding persistence or customization.
   PRD ref: `prd.md > The Core Journey`, `prd.md > Screens and Layout`, `prd.md > Look and Feel`, `prd.md > Review and complete checklists`, `prd.md > States and Boundaries`, `prd.md > What We're Building`
@@ -32,7 +32,7 @@ Build mode: fast
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after Slice 1, before final visual refinement.
-- [ ] Final kick-the-tires exploration and feedback completed — after Slice 2.
+- [x] Final kick-the-tires exploration and feedback completed — after Slice 2.
 
 ## Final Review
 
@@ -56,3 +56,4 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 - Slice 1 checkpoint feedback: organizer analysis works; for Slice 2, increase supporting text, labels, helper text, privacy notice, textarea, and button sizes, and consider a slightly wider main content/card. Keep the headline and behavior unchanged.
 - Changed the configurable Gemini default from `gemini-3.8-flash` to `gemini-3.6-flash`: the 3.8 model repeatedly returned an upstream HTTP 503 high-demand response in the live smoke test, while 3.6 completed the same Interactions API, structured-output validation, and source-excerpt verification flow. No automatic model fallback was added; 3.8 can be selected later through `GEMINI_MODEL` if availability improves.
 - Slice 2 checkpoint feedback: widen the main/results column, raise checklist/body text to around 16px, keep excerpts and secondary text at 14px or larger, and add vertical space between checklist rows. Preserve behavior, hierarchy, and calm visual style.
+- Final visual pass: user confirmed the existing sizing and spacing look good at normal browser text size; no further enlargement requested.
