@@ -31,14 +31,20 @@ npm run build
 
 ## Deploy (optional)
 
-The app is a Cloudflare Worker with Static Assets. Set `GEMINI_API_KEY` as a Worker secret, keep `GEMINI_MODEL` as a server-side variable, then deploy with Wrangler:
+The app is a Cloudflare Worker with Static Assets. Build the app and deploy the generated Worker configuration:
+
+```sh
+npm run build
+npx wrangler deploy --config dist/submission_lens/wrangler.json
+```
+
+On first deployment, set the server-side secret after the Worker is created:
 
 ```sh
 npx wrangler secret put GEMINI_API_KEY
-npx wrangler deploy
 ```
 
-The default model is configurable through `GEMINI_MODEL`; the app has no automatic model fallback. No database is used.
+The secret becomes active immediately. Keep `GEMINI_MODEL` as a server-side variable; it defaults to `gemini-3.6-flash` and has no automatic fallback. No database is used.
 
 ## Planning documents
 
