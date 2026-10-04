@@ -53,6 +53,8 @@ Open the local URL printed by Vite. The Cloudflare Vite plugin runs the SPA and 
 
 Deploy the Worker with `npx wrangler deploy`. Keep `GEMINI_API_KEY` as a Worker secret (for example, `npx wrangler secret put GEMINI_API_KEY`) and configure `GEMINI_MODEL` as a server-side Worker variable. Configure secrets for each deployment environment as appropriate. [Workers deployment](https://developers.cloudflare.com/workers/wrangler/commands/#deploy), [Workers secrets](https://developers.cloudflare.com/workers/configuration/secrets/).
 
+Public POC deployment (2026-10-04): [https://submission-lens.ayago.workers.dev](https://submission-lens.ayago.workers.dev). The Worker uses the server-side Gemini secret and `GEMINI_MODEL=gemini-3.6-flash`. The public `/api/analyze` route has no login or rate limiting, so anonymous callers can consume the Gemini free-tier quota; do not paste confidential, sensitive, or personal information.
+
 Submission still requires a short demo video and a public GitHub repository. The deployed Worker URL is useful for trying the app but does not replace either deliverable.
 
 ## Look and Feel
