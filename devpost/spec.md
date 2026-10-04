@@ -55,6 +55,8 @@ Deploy the Worker with `npx wrangler deploy`. Keep `GEMINI_API_KEY` as a Worker 
 
 Public POC deployment (2026-10-04): [https://submission-lens.ayago.workers.dev](https://submission-lens.ayago.workers.dev). The Worker uses the server-side Gemini secret and `GEMINI_MODEL=gemini-3.6-flash`. The public `/api/analyze` route has no login or rate limiting, so anonymous callers can consume the Gemini free-tier quota; do not paste confidential, sensitive, or personal information.
 
+Public repository: [https://github.com/atsushiyago/submission-lens](https://github.com/atsushiyago/submission-lens). The Build With AI: Basics update says to put this repository URL in the **Try it out link** field.
+
 Submission still requires a short demo video and a public GitHub repository. The deployed Worker URL is useful for trying the app but does not replace either deliverable.
 
 ## Look and Feel
