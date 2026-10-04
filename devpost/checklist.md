@@ -36,19 +36,19 @@ Build mode: fast
 
 ## Final Review
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Final review complete — user confirmed the final layout and behavior match the approved scope, PRD, and spec; no revisions requested; POC confirmed ready to ship.
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — focused alternative or brief evidence-based recap for an experienced plan-first user
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — focused alternative completed through the real Gemini model investigation recorded under `spec.md > Stack`, `spec.md > External Services and Dependencies`, and `Revisions` above.
+- [x] Optional edit and transfer reflection addressed — optional transfer question offered with the app map; response is not required.
+- [x] `devpost/app-map.html` generated from finished code and checked; shown at the end of the build workflow; includes a project-grounded practice to reuse.
 
-Activity and evidence: [what actually happened; real document/test/code references; unfinished work if interrupted]
-Route and stops: [actual paths and symbols; guided stops completed, or reference-only route]
-Edit outcome: [tried/kept/reverted/declined/not applicable; verification if changed]
-Reflection: [offered/answered/declined/already covered — personal answer belongs only in the ignored profile]
-Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
+Activity and evidence: Prior focused alternative during build: investigated repeated Gemini 3.8 Flash HTTP 503 high-demand failures, reran the same live sample with 3.6 Flash, and kept the API contract unchanged. Decision and evidence are documented in `spec.md > Stack`, `spec.md > External Services and Dependencies`, and `Revisions`; fixed-fixture tests cover deterministic validation failures. Final review passed with no changes requested.
+Route and stops: Reference-only route in `devpost/app-map.html`: `src/App.tsx` (`App`, `handleAnalyze`); `src/lib/analyze.ts` (`analyzeRules`); `worker/index.ts` (`handleAnalyze`) and `src/shared/analysis.ts` (`parseAnalysisText`, `verifySourceExcerpts`).
+Edit outcome: No optional code edit was needed or made.
+Reflection: Optional transfer question offered alongside the map; answer not required and no personal response recorded.
+Activity mode: Prior practice and evidence-based recap; no redundant code tour.
 
 ## Revisions
 

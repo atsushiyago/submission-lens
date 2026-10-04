@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Submission Lens — App Map</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.6 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #20312e; background: #f5f7f5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { width: min(100% - 2rem, 900px); margin: 2.5rem auto; }
+    header, section, footer { background: #fff; border: 1px solid #dce5df; border-radius: 14px; padding: 1.25rem 1.5rem; margin-block: 1rem; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { margin: 0 0 .4rem; font-size: 2rem; }
+    h2 { font-size: 1.3rem; margin: 0 0 .75rem; }
+    h3 { font-size: 1.05rem; margin: 1rem 0 .35rem; }
+    p { margin: .4rem 0 .8rem; }
+    a { color: #176957; text-underline-offset: .16em; }
+    code { font: .93em ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .eyebrow { color: #527066; font-size: .85rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .diagram { width: 100%; height: auto; display: block; margin: .75rem 0; }
+    .diagram text { font: 15px system-ui, sans-serif; fill: #20312e; }
+    .diagram .small { font-size: 13px; fill: #47665d; }
+    .diagram rect { fill: #f1f7f3; stroke: #83a99a; stroke-width: 1.5; rx: 12; }
+    .diagram path { fill: none; stroke: #487d6c; stroke-width: 2; }
+    .pointers { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .6rem 1rem; }
+    .pointers p { margin: 0; }
+    .meta { color: #4f625c; font-size: .9rem; }
+    @media (max-width: 600px) { main { width: min(100% - 1rem, 900px); margin: .5rem auto; } header, section, footer { padding: 1rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Project reference</p>
+      <h1>Submission Lens</h1>
+      <p>Paste hackathon rules, analyze them into grounded organizer requirements, then track them alongside general submission safety checks. The page and one server-side API route run together on a Cloudflare Worker with Static Assets.</p>
+    </header>
+
+    <section aria-labelledby="flow-title">
+      <h2 id="flow-title">One action through the app</h2>
+      <svg class="diagram" viewBox="0 0 820 245" role="img" aria-labelledby="diagram-title diagram-desc">
+        <title id="diagram-title">From pasted rules to a verified checklist</title>
+        <desc id="diagram-desc">The form in App.tsx calls the analyze helper, which posts to the Worker. The Worker validates Gemini's structured response and source excerpts, then the page renders requirements, safety checks, and progress.</desc>
+        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#487d6c"/></marker></defs>
+        <rect x="10" y="54" width="178" height="112"/><text x="28" y="88">Paste &amp; Analyze</text><text class="small" x="28" y="116">src/App.tsx</text><text class="small" x="28" y="139">handleAnalyze</text>
+        <rect x="224" y="54" width="178" height="112"/><text x="242" y="88">POST /api/analyze</text><text class="small" x="242" y="116">src/lib/analyze.ts</text><text class="small" x="242" y="139">analyzeRules</text>
+        <rect x="438" y="54" width="178" height="112"/><text x="456" y="88">Analyze &amp; verify</text><text class="small" x="456" y="116">worker/index.ts</text><text class="small" x="456" y="139">shared/analysis.ts</text>
+        <rect x="652" y="54" width="158" height="112"/><text x="670" y="88">Checklist &amp; counts</text><text class="small" x="670" y="116">App + components</text><text class="small" x="670" y="139">visible results</text>
+        <path d="M188 110 H216" marker-end="url(#arrow)"/><path d="M402 110 H430" marker-end="url(#arrow)"/><path d="M616 110 H644" marker-end="url(#arrow)"/>
+        <text class="small" x="438" y="205">Gemini Interactions API · server-side key · no database</text>
+      </svg>
+      <p>The Worker asks Gemini for schema-constrained JSON, validates the parsed result, and checks each excerpt against the pasted text. An unmatched excerpt is suppressed and the item becomes “Needs review.” The browser only receives validated checklist data.</p>
+    </section>
+
+    <section aria-labelledby="route-title">
+      <h2 id="route-title">Reference route through the code</h2>
+      <p>This route is a map for future changes; the build used a prior evidence-based review rather than a separate code-tour exercise.</p>
+      <ol>
+        <li><code>src/App.tsx</code> — <code>App</code> and <code>handleAnalyze</code> own in-memory input, errors, checklist state, and the main page composition.</li>
+        <li><code>src/lib/analyze.ts</code> — <code>analyzeRules</code> sends the browser request and validates the returned response shape.</li>
+        <li><code>worker/index.ts</code> — <code>handleAnalyze</code> calls Gemini; <code>src/shared/analysis.ts</code> parses the structured JSON and verifies source excerpts. The checklist components render the returned requirements and built-in checks.</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="change-title">
+      <h2 id="change-title">To change this, start here</h2>
+      <div class="pointers">
+        <p><strong>Organizer categories or response validation:</strong> <code>src/shared/analysis.ts</code></p>
+        <p><strong>Gemini prompt, API call, and controlled errors:</strong> <code>worker/index.ts</code></p>
+        <p><strong>Built-in safety items:</strong> <code>src/data/safetyChecks.ts</code></p>
+        <p><strong>Checklist sections and progress behavior:</strong> <code>src/App.tsx</code> and <code>src/components/</code></p>
+        <p><strong>Visual style and spacing:</strong> <code>src/styles.css</code></p>
+        <p><strong>Model selection:</strong> server-side <code>GEMINI_MODEL</code>; local development uses ignored <code>.dev.vars</code>.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="practice-title">
+      <h2 id="practice-title">A practice to reuse</h2>
+      <p>When Gemini 3.8 Flash returned repeated upstream 503 high-demand errors, the evidence pointed to provider availability rather than the request contract: the same Interactions API and validation path succeeded with 3.6 Flash. The model default and rationale were recorded in <code>devpost/spec.md</code> and <code>devpost/checklist.md</code>, while the model remained configurable and no fallback logic was added. On another project, isolate a failure with a controlled comparison, change only the decision the evidence supports, and record the reason in the plan.</p>
+    </section>
+
+    <footer>
+      <p><strong>Run locally:</strong> <code>npm run dev -- --host 127.0.0.1</code> (configure the local server secret in ignored <code>.dev.vars</code> first). Run <code>npm test</code>, <code>npm run typecheck</code>, and <code>npm run build</code> for checks.</p>
+      <p class="meta">Map source commit: <code>e5ee352</code>. This is a static snapshot of that implementation and can drift as the code changes. Open this file directly in a browser; it has no scripts, external assets, or network dependency.</p>
+    </footer>
+  </main>
+</body>
+</html>
