@@ -1,7 +1,10 @@
 import { useState, type FormEvent } from "react";
 import RequirementsList from "./components/RequirementsList";
+import ProgressSummary from "./components/ProgressSummary";
+import SafetyChecklist from "./components/SafetyChecklist";
 import { AnalyzeRequestError, analyzeRules } from "./lib/analyze";
 import { MAX_RULE_CHARACTERS, countCharacters, type AnalysisResponse } from "./shared/analysis";
+import { SAFETY_CHECKS } from "./data/safetyChecks";
 
 const EMPTY_INPUT_MESSAGE = "Paste some hackathon rules or submission requirements before analyzing.";
 const OVER_LIMIT_MESSAGE = "Rules must be 50,000 characters or fewer.";
@@ -14,6 +17,10 @@ export default function App() {
   const [inputError, setInputError] = useState<string | null>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const characterCount = countCharacters(rulesText);
+  const organizerCompleted = analysis?.requirements.filter((item) => completedIds.has(`organizer:${item.id}`)).length ?? 0;
+  const safetyCompleted = SAFETY_CHECKS.filter((item) => completedIds.has(`safety:${item.id}`)).length;
+  const organizerRemaining = (analysis?.requirements.length ?? 0) - organizerCompleted;
+  const safetyRemaining = SAFETY_CHECKS.length - safetyCompleted;
 
   async function handleAnalyze(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -120,20 +127,36 @@ export default function App() {
       </section>
 
       {analysis && (
-        <section className="results-section" aria-labelledby="organizer-heading">
-          <div className="results-heading">
-            <div>
-              <p className="eyebrow">STEP 2 · REVIEW YOUR LIST</p>
-              <h2 id="organizer-heading">Organizer Requirements</h2>
+        <div className="results-content">
+          <ProgressSummary organizerRemaining={organizerRemaining} safetyRemaining={safetyRemaining} />
+          <section className="results-section" aria-labelledby="organizer-heading">
+            <div className="results-heading">
+              <div>
+                <p className="eyebrow">STEP 2 · REVIEW YOUR LIST</p>
+                <h2 id="organizer-heading">Organizer Requirements</h2>
+                <p className="section-progress">{organizerCompleted} of {analysis.requirements.length} complete</p>
+              </div>
+              <span className="section-chip">From event rules</span>
             </div>
-            <span className="section-chip">From event rules</span>
-          </div>
-          <RequirementsList
-            requirements={analysis.requirements}
-            completedIds={completedIds}
-            onToggle={toggleRequirement}
-          />
-        </section>
+            <RequirementsList
+              requirements={analysis.requirements}
+              completedIds={new Set([...completedIds].filter((id) => id.startsWith("organizer:")).map((id) => id.slice("organizer:".length)))}
+              onToggle={(id) => toggleRequirement(`organizer:${id}`)}
+            />
+          </section>
+
+          <section className="results-section results-section--safety" aria-labelledby="safety-heading">
+            <div className="results-heading">
+              <div>
+                <p className="eyebrow">GENERAL RECOMMENDATIONS</p>
+                <h2 id="safety-heading">Submission Safety Checks</h2>
+                <p className="section-progress">{safetyCompleted} of {SAFETY_CHECKS.length} complete</p>
+              </div>
+              <span className="section-chip section-chip--safety">Not from event rules</span>
+            </div>
+            <SafetyChecklist completedIds={completedIds} onToggle={toggleRequirement} />
+          </section>
+        </div>
       )}
 
       <footer className="page-footer">

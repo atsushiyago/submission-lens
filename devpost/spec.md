@@ -31,7 +31,7 @@ PRD ref: `prd.md > The Core Journey`.
 
 - **Vite + React + TypeScript** — learner-selected single-page web app stack. Vite serves the development page and builds static assets; React renders the single workflow; TypeScript describes request, response, and checklist shapes. [Vite](https://vite.dev/guide/), [React](https://react.dev/learn), [TypeScript](https://www.typescriptlang.org/docs/).
 - **Cloudflare Workers with Static Assets and the Cloudflare Vite plugin** — one deployment serves the React SPA and `/api/analyze`, with no separate server or Pages Functions. [Vite plugin tutorial](https://developers.cloudflare.com/workers/vite-plugin/tutorial/), [Static Assets](https://developers.cloudflare.com/workers/static-assets/).
-- **Gemini 3.8 Flash through the REST Interactions API** — learner-selected model and provider. The model is read from server-side `GEMINI_MODEL` with `gemini-3.8-flash` as the initial deployment value; it is not compiled into the browser. Gemini's structured JSON response makes results predictable to parse, but does not establish that a requirement is true. [Gemini 3.8 Flash](https://ai.google.dev/gemini-api/docs/models), [Interactions API](https://ai.google.dev/api/interactions-api), [structured outputs](https://ai.google.dev/gemini-api/docs/structured-output).
+- **Gemini 3.6 Flash through the REST Interactions API** — learner-selected provider and reliability choice for this POC. The model is read from server-side `GEMINI_MODEL` with `gemini-3.6-flash` as the initial deployment value; it is not compiled into the browser. Gemini's structured JSON response makes results predictable to parse, but does not establish that a requirement is true. `gemini-3.8-flash` was tested but repeatedly returned upstream HTTP 503 high-demand errors; the same sample succeeded with 3.6 Flash through the Interactions API, schema validation, and excerpt verification. Keep `GEMINI_MODEL` configurable so the project can switch back if availability improves. [Gemini 3.6 Flash](https://ai.google.dev/gemini-api/docs/models/gemini-3.6-flash), [Gemini models](https://ai.google.dev/gemini-api/docs/models), [Interactions API](https://ai.google.dev/api/interactions-api), [structured outputs](https://ai.google.dev/gemini-api/docs/structured-output).
 - **Plain `fetch` for the Gemini REST request; no Google SDK** — learner-selected to keep the function small and avoid an SDK dependency. The function owns response parsing and runtime validation.
 - **No database or persistence service** — follows the approved PRD: page state lives in React memory and resets on refresh.
 - **Wrangler CLI and Cloudflare Vite plugin** — run the Worker and static assets locally and deploy them together as a Worker. [Cloudflare Vite plugin](https://developers.cloudflare.com/workers/vite-plugin/), [Wrangler](https://developers.cloudflare.com/workers/wrangler/).
@@ -40,7 +40,7 @@ Use the Node.js LTS available during the build and commit the generated package 
 
 ## Where It Runs and How Someone Tries It
 
-The page and `/api/analyze` run together as one Cloudflare Worker with Static Assets. A local run needs Node.js, npm, Wrangler, and a Gemini API key. A Google AI Studio free-tier key is supplied locally through an ignored `.dev.vars` file as `GEMINI_API_KEY="..."`; never put it in a `VITE_` variable, browser code, or committed Wrangler configuration. Set `GEMINI_MODEL` as a server-side Worker variable, initially `gemini-3.8-flash`.
+The page and `/api/analyze` run together as one Cloudflare Worker with Static Assets. A local run needs Node.js, npm, Wrangler, and a Gemini API key. A Google AI Studio free-tier key is supplied locally through an ignored `.dev.vars` file as `GEMINI_API_KEY="..."`; never put it in a `VITE_` variable, browser code, or committed Wrangler configuration. Set `GEMINI_MODEL` as a server-side Worker variable, initially `gemini-3.6-flash`.
 
 From the project root, the full local preview is:
 
@@ -189,7 +189,7 @@ submission-lens/
 
   ```json
   {
-    "model": "gemini-3.8-flash",
+    "model": "gemini-3.6-flash",
     "input": "<fixed extraction instructions and pasted rules>",
     "store": false,
     "response_format": {
@@ -221,7 +221,7 @@ submission-lens/
   ```
 
 - **Response:** inspect the completed interaction's `steps`, select its model-output text content, parse it as JSON, validate it against the shared schema, then verify each excerpt before returning anything to the browser. Do not assume an SDK-only convenience property in the REST response. Treat provider errors, incomplete interactions, empty text, malformed JSON, schema mismatch, and refusal as controlled analysis failures; do not return provider internals or raw invalid model text.
-- **Model:** `GEMINI_MODEL`, defaulted to `gemini-3.8-flash` in server configuration. Do not accept a model name from the browser.
+- **Model:** `GEMINI_MODEL`, defaulted to `gemini-3.6-flash` in server configuration. Do not accept a model name from the browser.
 - **Cost and data use:** the learner chose the Gemini free tier for this POC. Free-tier availability and per-model request/token limits can change; check the live quota in AI Studio during setup. Google currently states that free-tier prompts may be used to improve its products, while paid-tier prompts are not. The page warns against confidential, sensitive, or personal input. Before operating as a production service, move to a paid-tier Gemini project as the learner requested. `store: false` prevents interaction state from being stored by the API. [Gemini pricing and data use](https://ai.google.dev/gemini-api/docs/pricing), [current model list](https://ai.google.dev/gemini-api/docs/models), [Interactions API](https://ai.google.dev/api/interactions-api).
 - **Schema details:** the schema is kept shallow and within documented structured-output constraints, then explicitly validated at runtime. Confirm the exact schema is accepted by the selected model during the first live build call. [Structured output support](https://ai.google.dev/gemini-api/docs/structured-output), [Interactions API](https://ai.google.dev/api/interactions-api).
 
@@ -251,8 +251,8 @@ submission-lens/
 
 - **Input limit:** cap pasted rules at 50,000 characters in both client and Worker; oversized text never reaches Gemini.
 
-- **Learner choices:** Vite, React, TypeScript, Cloudflare Workers with Static Assets and one route, Gemini 3.8 Flash, no database, free tier for the POC, a server-only API key, a configurable server-side model name, schema-constrained JSON, and a REST `fetch` call without the Google SDK.
+- **Learner choices:** Vite, React, TypeScript, Cloudflare Workers with Static Assets and one route, Gemini 3.6 Flash, no database, free tier for the POC, a server-only API key, a configurable server-side model name, schema-constrained JSON, and a REST `fetch` call without the Google SDK. 3.8 Flash remains selectable through `GEMINI_MODEL` if availability improves.
 - **Output handling:** malformed or schema-invalid Gemini responses produce a controlled error, not repair or guesswork. A missing/unmatched excerpt marks the requirement **Needs review** and the quote is suppressed.
 - **Privacy:** show a short warning not to paste confidential, sensitive, or personal information; no consent flow or settings. Use a paid-tier Gemini project before production service operation.
 - **Useful technical distinction clarified:** structured output constrains response shape, not truth. Exact whitespace-normalized excerpt matching checks provenance of the quote but not semantic correctness of the title; the prompt must still mark ambiguous text uncertain, and this limitation should be kept visible during build review.
-- **Build-time checks:** confirm the exact JSON Schema is accepted by `gemini-3.8-flash`, confirm current free-tier quota for the learner's key in AI Studio, and try explicit, ambiguous, and absent requirements. No unresolved product decision blocks the build.
+- **Build-time checks:** confirm the exact JSON Schema is accepted by `gemini-3.6-flash`, confirm current free-tier quota for the learner's key in AI Studio, and try explicit, ambiguous, and absent requirements. No unresolved product decision blocks the build.

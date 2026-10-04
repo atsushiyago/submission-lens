@@ -113,6 +113,18 @@ describe("POST /api/analyze", () => {
     });
   });
 
+  it("defaults to Gemini 3.6 Flash when no model override is configured", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(mockInteractionResponse(VALID_REQUIREMENTS));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const response = await handleAnalyze(apiRequest(), { ...env, GEMINI_MODEL: undefined });
+    const [, options] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    const requestBody = JSON.parse(String(options.body));
+
+    expect(response.status).toBe(200);
+    expect(requestBody.model).toBe("gemini-3.6-flash");
+  });
+
   it("routes unknown API paths to a JSON not-found response", async () => {
     const response = await worker.fetch(
       new Request("https://submission-lens.test/api/other"),
