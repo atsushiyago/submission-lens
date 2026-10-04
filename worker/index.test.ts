@@ -12,6 +12,9 @@ const VALID_REQUIREMENTS = JSON.stringify({
     },
   ],
 });
+const TEMPORARY_CAPACITY_RESPONSE = Response.json({
+  error: { status: "UNAVAILABLE", message: "The service is experiencing high demand. Try again later." },
+}, { status: 503 });
 
 const env = {
   GEMINI_API_KEY: "test-key",
@@ -52,7 +55,8 @@ describe("POST /api/analyze", () => {
   });
 
   it("turns malformed structured output into a controlled error", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockInteractionResponse('{"requirements":[')));
+    const fetchSpy = vi.fn().mockResolvedValue(mockInteractionResponse('{"requirements":['));
+    vi.stubGlobal("fetch", fetchSpy);
 
     const response = await handleAnalyze(apiRequest(), env);
     const body = await response.json();
@@ -60,6 +64,7 @@ describe("POST /api/analyze", () => {
     expect(response.status).toBe(502);
     expect(body).toEqual({ error: { code: "analysis_failed", message: "Analysis returned an invalid result. Please try again." } });
     expect(JSON.stringify(body)).not.toContain("requirements");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   it("turns schema-invalid structured output into a controlled error", async () => {
@@ -74,16 +79,19 @@ describe("POST /api/analyze", () => {
         },
       ],
     });
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockInteractionResponse(invalid)));
+    const fetchSpy = vi.fn().mockResolvedValue(mockInteractionResponse(invalid));
+    vi.stubGlobal("fetch", fetchSpy);
 
     const response = await handleAnalyze(apiRequest(), env);
     expect(response.status).toBe(502);
     expect(await response.json()).toMatchObject({ error: { code: "analysis_failed" } });
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   it("marks an unmatched source excerpt for review and never returns that quote", async () => {
     const invalidExcerpt = VALID_REQUIREMENTS.replace(SAMPLE_TEXT, "Your video must be public.");
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockInteractionResponse(invalidExcerpt)));
+    const fetchSpy = vi.fn().mockResolvedValue(mockInteractionResponse(invalidExcerpt));
+    vi.stubGlobal("fetch", fetchSpy);
 
     const response = await handleAnalyze(apiRequest(), env);
     const body = await response.json();
@@ -93,6 +101,50 @@ describe("POST /api/analyze", () => {
       requirements: [{ needsReview: true, sourceExcerpt: null }],
     });
     expect(JSON.stringify(body)).not.toContain("Your video must be public.");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries a transient 503 once with the same model and request", async () => {
+    const fetchSpy = vi.fn()
+      .mockResolvedValueOnce(TEMPORARY_CAPACITY_RESPONSE)
+      .mockResolvedValueOnce(mockInteractionResponse(VALID_REQUIREMENTS));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const response = await handleAnalyze(apiRequest(), env);
+    const firstBody = JSON.parse(String((fetchSpy.mock.calls[0][1] as RequestInit).body));
+    const secondBody = JSON.parse(String((fetchSpy.mock.calls[1][1] as RequestInit).body));
+
+    expect(response.status).toBe(200);
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(firstBody).toEqual(secondBody);
+    expect(secondBody.model).toBe("gemini-test-model");
+  });
+
+  it("returns the generic error when the one transient retry also fails", async () => {
+    const fetchSpy = vi.fn()
+      .mockResolvedValueOnce(TEMPORARY_CAPACITY_RESPONSE)
+      .mockResolvedValueOnce(TEMPORARY_CAPACITY_RESPONSE);
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const response = await handleAnalyze(apiRequest(), env);
+
+    expect(response.status).toBe(502);
+    expect(await response.json()).toEqual({
+      error: { code: "analysis_failed", message: "Analysis failed. Please try again." },
+    });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry a 503 that is not classified as transient capacity", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(Response.json({
+      error: { status: "INVALID_ARGUMENT", message: "Request schema is invalid." },
+    }, { status: 503 }));
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const response = await handleAnalyze(apiRequest(), env);
+
+    expect(response.status).toBe(502);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   it("uses the configured model, server key, schema, and stateless Interactions request", async () => {

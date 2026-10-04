@@ -68,7 +68,7 @@ export async function handleAnalyze(request: Request, env: Env): Promise<Respons
 
   const model = env.GEMINI_MODEL || "gemini-3.6-flash";
   try {
-    const interactionResponse = await fetch(GEMINI_INTERACTIONS_URL, {
+    const requestOptions: RequestInit = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +88,20 @@ export async function handleAnalyze(request: Request, env: Env): Promise<Respons
           schema: ANALYSIS_SCHEMA,
         },
       }),
-    });
+    };
+    let interactionResponse = await fetch(GEMINI_INTERACTIONS_URL, requestOptions);
+
+    if (interactionResponse.status === 503) {
+      const firstFailure = await getProviderErrorDetails(
+        interactionResponse.clone(),
+        env.GEMINI_API_KEY,
+        body.text,
+      );
+      if (firstFailure.cause === "temporary_capacity") {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        interactionResponse = await fetch(GEMINI_INTERACTIONS_URL, requestOptions);
+      }
+    }
 
     if (!interactionResponse.ok) {
       const providerError = await getProviderErrorDetails(
