@@ -47,7 +47,7 @@ Build mode: fast
 Activity and evidence: Prior focused alternative during build: investigated repeated Gemini 3.8 Flash HTTP 503 high-demand failures, reran the same live sample with 3.6 Flash, and kept the API contract unchanged. Decision and evidence are documented in `spec.md > Stack`, `spec.md > External Services and Dependencies`, and `Revisions`; fixed-fixture tests cover deterministic validation failures. Final review passed with no changes requested.
 Route and stops: Reference-only route in `devpost/app-map.html`: `src/App.tsx` (`App`, `handleAnalyze`); `src/lib/analyze.ts` (`analyzeRules`); `worker/index.ts` (`handleAnalyze`) and `src/shared/analysis.ts` (`parseAnalysisText`, `verifySourceExcerpts`).
 Edit outcome: No optional code edit was needed or made.
-Reflection: Optional transfer question offered alongside the map; answer not required and no personal response recorded.
+Reflection: Optional transfer question answered; the personal response is stored only in the ignored learner profile.
 Activity mode: Prior practice and evidence-based recap; no redundant code tour.
 
 ## Revisions
